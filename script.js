@@ -132,6 +132,11 @@ let thrownAwayCards = [];
             this.update();
         }
 
+        setClickHandler(callback) {
+            this.sprite.removeAllListeners();
+            this.sprite.on('click', callback);
+        }
+
         update() {
             let animationType;
 
@@ -165,14 +170,14 @@ let thrownAwayCards = [];
         new Card("hitman"),
         new Card("reverse"),
         new Card("sneak"),
-        new Card("shuffle")
-    ];
-
-    visibleDeck = [
+        new Card("shuffle"),
         new Card("attack"),
         new Card("hitman"),
         new Card("reverse"),
         new Card("sneak"),
+    ];
+
+    visibleDeck = [
         new Card("shuffle")
     ];
 
@@ -182,18 +187,13 @@ let thrownAwayCards = [];
         new Card("theif"),
         new Card("reverse"),
         new Card("sneak"),
-        new Card("attack")
+        new Card("attack"),
     ]
 
     updateVisibleDeck();
     updateHiddenDeck();
     updateInventory();
 
-    inventory.forEach((card, index) => {
-        card.sprite.on('click', () => {
-            playCard(card);
-        });
-    });
     
 
     function updateHiddenDeck() {
@@ -201,12 +201,14 @@ let thrownAwayCards = [];
             let current = hiddenDeck[i];
 
             current.x = 60;
-            current.y = -(i*5);
+            current.y = -(i*2);
             current.flippedOver = true;
             current.update();
 
             app.stage.removeChild(current.sprite);
             app.stage.addChild(current.sprite); // Adds it back on top
+
+            current.setClickHandler(() => fetchCardFromDeck());
         }
     }
 
@@ -214,13 +216,14 @@ let thrownAwayCards = [];
         for (let i = 0; i < visibleDeck.length; i++) {
             let current = visibleDeck[i];
 
-            current.y = -(i*5);
+            current.y = -(i*2);
             current.x = -60;
             current.flippedOver = false;
             current.update();
 
             app.stage.removeChild(current.sprite);
             app.stage.addChild(current.sprite); // Adds it back on top
+            current.setClickHandler(() => {});
         }
     }
 
@@ -233,6 +236,7 @@ let thrownAwayCards = [];
             console.log(current.sprite.width);
             current.flippedOver = false;
             current.update();
+            current.setClickHandler(() => playCard(current));
         }
     }
 
@@ -243,6 +247,16 @@ let thrownAwayCards = [];
         inventory.splice(index, 1); // Remove from inventory
 
         updateVisibleDeck();
+        updateInventory();
+    }
+
+    function fetchCardFromDeck() {
+        const index = hiddenDeck.length - 1;
+
+        inventory.push(hiddenDeck[index]);
+        hiddenDeck.splice(index, 1);
+
+        updateHiddenDeck();
         updateInventory();
     }
 })();
